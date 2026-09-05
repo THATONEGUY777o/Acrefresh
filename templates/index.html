@@ -195,7 +195,6 @@
         <p>Animal Company session manager</p>
     </div>
 
-    <!-- Setup -->
     <div class="card">
 
         <h2>🔐 Setup</h2>
@@ -233,32 +232,33 @@
         >
 
         <div class="buttons">
+
             <button class="primary" onclick="startApp()">
                 ▶ Start
             </button>
 
-            <button onclick="refreshDemo()">
+            <button onclick="refreshTokenInfo()">
                 🔄 Refresh Now
             </button>
 
-            <button onclick="reloginDemo()">
+            <button onclick="relogin()">
                 🔑 Re-Login Now
             </button>
 
             <button onclick="clearFields()">
                 🗑 Clear
             </button>
+
         </div>
 
         <div class="warning">
-            ⚠️ This page is currently a local/demo interface.
-            It does not send your credentials to Animal Company or
-            attempt to bypass authentication.
+            ⚠️ This interface does not contact the authentication
+            service. It only works with credentials you provide yourself.
         </div>
 
     </div>
 
-    <!-- Status -->
+
     <div class="card">
 
         <h2>📡 Current Status</h2>
@@ -270,7 +270,7 @@
 
     </div>
 
-    <!-- Token -->
+
     <div class="card">
 
         <h2>🎫 Token Status</h2>
@@ -279,18 +279,19 @@
             No token loaded.
         </p>
 
-        <button class="download" onclick="downloadDemo()">
+        <button class="download" onclick="downloadToken()">
             ⬇ Download token.json
         </button>
 
     </div>
 
-    <!-- Log -->
+
     <div class="card">
 
         <h2>📋 Log</h2>
 
         <div id="log" class="log">
+
             <div class="log-line">
                 [SYSTEM] AC Token Refresher loaded.
             </div>
@@ -298,12 +299,14 @@
             <div class="log-line">
                 [SYSTEM] Waiting for input...
             </div>
+
         </div>
 
     </div>
 
+
     <div class="footer">
-        AC Token Refresher • Demo Interface
+        AC Token Refresher
     </div>
 
 </div>
@@ -312,6 +315,7 @@
 <script>
 
     function addLog(message) {
+
         const log = document.getElementById("log");
 
         const time = new Date().toLocaleTimeString();
@@ -331,12 +335,19 @@
     function startApp() {
 
         const serverKey =
-            document.getElementById("serverKey").value;
+            document.getElementById("serverKey").value.trim();
 
         const deviceId =
-            document.getElementById("deviceId").value;
+            document.getElementById("deviceId").value.trim();
+
+        const bearer =
+            document.getElementById("bearer").value.trim();
+
+        const refresh =
+            document.getElementById("refresh").value.trim();
 
         if (!serverKey || !deviceId) {
+
             addLog("Please enter a Server Key and Device ID.");
 
             return;
@@ -346,29 +357,52 @@
             .classList.add("active");
 
         document.getElementById("statusText")
-            .textContent = "Running (demo)";
+            .textContent = "Ready";
 
-        document.getElementById("tokenStatus")
-            .textContent = "Session initialized in demo mode.";
+        if (bearer && refresh) {
 
-        addLog("Session initialized.");
-        addLog("Authentication backend is not connected.");
+            document.getElementById("tokenStatus")
+                .textContent = "Credentials loaded.";
+
+            addLog("Credentials loaded.");
+
+        } else {
+
+            document.getElementById("tokenStatus")
+                .textContent = "Server/device information loaded.";
+
+            addLog("Server and device information loaded.");
+
+        }
+
+        addLog("Ready.");
     }
 
 
-    function refreshDemo() {
+    function refreshTokenInfo() {
 
-        addLog("Refresh requested.");
+        const bearer =
+            document.getElementById("bearer").value.trim();
+
+        const refresh =
+            document.getElementById("refresh").value.trim();
+
+        if (!bearer || !refresh) {
+
+            addLog("Bearer and refresh token fields are required.");
+
+            return;
+        }
 
         document.getElementById("tokenStatus")
             .textContent =
-            "Demo refresh completed — no real token was changed.";
+            "Existing credentials are ready to be downloaded.";
 
-        addLog("Demo refresh completed.");
+        addLog("Credential information checked.");
     }
 
 
-    function reloginDemo() {
+    function relogin() {
 
         addLog("Re-login requested.");
 
@@ -378,7 +412,10 @@
         document.getElementById("statusDot")
             .classList.remove("active");
 
-        addLog("No authentication provider is connected.");
+        document.getElementById("tokenStatus")
+            .textContent = "Enter new credentials.";
+
+        addLog("Please provide new credentials.");
     }
 
 
@@ -402,20 +439,49 @@
     }
 
 
-    function downloadDemo() {
+    function downloadToken() {
 
-        const demoData = {
-            bearer: "DEMO_TOKEN",
-            refresh_token: "DEMO_REFRESH_TOKEN",
-            serverKey: "DEMO_SERVER_KEY",
-            deviceId: "DEMO_DEVICE",
+        const bearer =
+            document.getElementById("bearer").value.trim();
+
+        const refreshToken =
+            document.getElementById("refresh").value.trim();
+
+        const serverKey =
+            document.getElementById("serverKey").value.trim();
+
+        const deviceId =
+            document.getElementById("deviceId").value.trim();
+
+        if (!bearer || !refreshToken || !serverKey || !deviceId) {
+
+            addLog("Please fill in all credential fields first.");
+
+            return;
+        }
+
+        const tokenData = {
+
+            bearer: bearer,
+
+            refresh_token: refreshToken,
+
+            serverKey: serverKey,
+
+            deviceId: deviceId,
+
             expires: 0,
+
             downloadedAt: new Date().toISOString()
+
         };
 
         const blob = new Blob(
-            [JSON.stringify(demoData, null, 2)],
+
+            [JSON.stringify(tokenData, null, 2)],
+
             { type: "application/json" }
+
         );
 
         const url = URL.createObjectURL(blob);
@@ -423,13 +489,22 @@
         const a = document.createElement("a");
 
         a.href = url;
+
         a.download = "token.json";
+
+        document.body.appendChild(a);
 
         a.click();
 
+        document.body.removeChild(a);
+
         URL.revokeObjectURL(url);
 
-        addLog("Demo token.json downloaded.");
+        addLog("token.json downloaded.");
+
+        document.getElementById("tokenStatus")
+            .textContent =
+            "token.json created from the entered credentials.";
     }
 
 </script>
