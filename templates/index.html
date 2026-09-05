@@ -1,10 +1,438 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>AC Token Refresher</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #111318;
+            color: #f1f1f1;
+            display: flex;
+            justify-content: center;
+            padding: 35px 15px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .header p {
+            margin-top: 8px;
+            color: #999;
+        }
+
+        .card {
+            background: #1b1e25;
+            border: 1px solid #30343d;
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 18px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 20px;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 7px;
+            color: #c8c8c8;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 7px;
+            border: 1px solid #3a3e47;
+            background: #111318;
+            color: white;
+            outline: none;
+            font-size: 14px;
+        }
+
+        input:focus {
+            border-color: #777;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            border: none;
+            border-radius: 7px;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #2d323c;
+            color: white;
+            transition: 0.15s;
+        }
+
+        button:hover {
+            background: #3a404c;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .primary {
+            background: #3d7cff;
+        }
+
+        .primary:hover {
+            background: #316ce0;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 12px;
+            border-radius: 7px;
+            background: #111318;
+            border: 1px solid #30343d;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #777;
+        }
+
+        .dot.active {
+            background: #45d483;
+        }
+
+        .log {
+            background: #0d0f13;
+            border: 1px solid #30343d;
+            border-radius: 7px;
+            padding: 12px;
+            height: 160px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        .log-line {
+            margin-bottom: 7px;
+            color: #aaa;
+        }
+
+        .download {
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        .warning {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 7px;
+            background: #252118;
+            border: 1px solid #51452a;
+            color: #d8c99c;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            margin-top: 25px;
+        }
+
+        @media (max-width: 500px) {
+            .buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 26px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <h1>AC Token Refresher</h1>
-    <p>It works!</p>
+
+<div class="container">
+
+    <div class="header">
+        <h1>⚡ AC Token Refresher</h1>
+        <p>Animal Company session manager</p>
+    </div>
+
+    <!-- Setup -->
+    <div class="card">
+
+        <h2>🔐 Setup</h2>
+
+        <label for="serverKey">Server Key</label>
+        <input
+            id="serverKey"
+            type="password"
+            placeholder="Enter server key"
+            autocomplete="off"
+        >
+
+        <label for="deviceId">Device ID</label>
+        <input
+            id="deviceId"
+            type="text"
+            placeholder="Enter device ID"
+            autocomplete="off"
+        >
+
+        <label for="bearer">Bearer Token</label>
+        <input
+            id="bearer"
+            type="password"
+            placeholder="Enter bearer token"
+            autocomplete="off"
+        >
+
+        <label for="refresh">Refresh Token</label>
+        <input
+            id="refresh"
+            type="password"
+            placeholder="Enter refresh token"
+            autocomplete="off"
+        >
+
+        <div class="buttons">
+            <button class="primary" onclick="startApp()">
+                ▶ Start
+            </button>
+
+            <button onclick="refreshDemo()">
+                🔄 Refresh Now
+            </button>
+
+            <button onclick="reloginDemo()">
+                🔑 Re-Login Now
+            </button>
+
+            <button onclick="clearFields()">
+                🗑 Clear
+            </button>
+        </div>
+
+        <div class="warning">
+            ⚠️ This page is currently a local/demo interface.
+            It does not send your credentials to Animal Company or
+            attempt to bypass authentication.
+        </div>
+
+    </div>
+
+    <!-- Status -->
+    <div class="card">
+
+        <h2>📡 Current Status</h2>
+
+        <div class="status">
+            <span id="statusDot" class="dot"></span>
+            <span id="statusText">Not started</span>
+        </div>
+
+    </div>
+
+    <!-- Token -->
+    <div class="card">
+
+        <h2>🎫 Token Status</h2>
+
+        <p id="tokenStatus">
+            No token loaded.
+        </p>
+
+        <button class="download" onclick="downloadDemo()">
+            ⬇ Download token.json
+        </button>
+
+    </div>
+
+    <!-- Log -->
+    <div class="card">
+
+        <h2>📋 Log</h2>
+
+        <div id="log" class="log">
+            <div class="log-line">
+                [SYSTEM] AC Token Refresher loaded.
+            </div>
+
+            <div class="log-line">
+                [SYSTEM] Waiting for input...
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        AC Token Refresher • Demo Interface
+    </div>
+
+</div>
+
+
+<script>
+
+    function addLog(message) {
+        const log = document.getElementById("log");
+
+        const time = new Date().toLocaleTimeString();
+
+        const line = document.createElement("div");
+
+        line.className = "log-line";
+
+        line.textContent = `[${time}] ${message}`;
+
+        log.appendChild(line);
+
+        log.scrollTop = log.scrollHeight;
+    }
+
+
+    function startApp() {
+
+        const serverKey =
+            document.getElementById("serverKey").value;
+
+        const deviceId =
+            document.getElementById("deviceId").value;
+
+        if (!serverKey || !deviceId) {
+            addLog("Please enter a Server Key and Device ID.");
+
+            return;
+        }
+
+        document.getElementById("statusDot")
+            .classList.add("active");
+
+        document.getElementById("statusText")
+            .textContent = "Running (demo)";
+
+        document.getElementById("tokenStatus")
+            .textContent = "Session initialized in demo mode.";
+
+        addLog("Session initialized.");
+        addLog("Authentication backend is not connected.");
+    }
+
+
+    function refreshDemo() {
+
+        addLog("Refresh requested.");
+
+        document.getElementById("tokenStatus")
+            .textContent =
+            "Demo refresh completed — no real token was changed.";
+
+        addLog("Demo refresh completed.");
+    }
+
+
+    function reloginDemo() {
+
+        addLog("Re-login requested.");
+
+        document.getElementById("statusText")
+            .textContent = "Re-login required";
+
+        document.getElementById("statusDot")
+            .classList.remove("active");
+
+        addLog("No authentication provider is connected.");
+    }
+
+
+    function clearFields() {
+
+        document.getElementById("serverKey").value = "";
+        document.getElementById("deviceId").value = "";
+        document.getElementById("bearer").value = "";
+        document.getElementById("refresh").value = "";
+
+        document.getElementById("statusText")
+            .textContent = "Not started";
+
+        document.getElementById("statusDot")
+            .classList.remove("active");
+
+        document.getElementById("tokenStatus")
+            .textContent = "No token loaded.";
+
+        addLog("Fields cleared.");
+    }
+
+
+    function downloadDemo() {
+
+        const demoData = {
+            bearer: "DEMO_TOKEN",
+            refresh_token: "DEMO_REFRESH_TOKEN",
+            serverKey: "DEMO_SERVER_KEY",
+            deviceId: "DEMO_DEVICE",
+            expires: 0,
+            downloadedAt: new Date().toISOString()
+        };
+
+        const blob = new Blob(
+            [JSON.stringify(demoData, null, 2)],
+            { type: "application/json" }
+        );
+
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+
+        a.href = url;
+        a.download = "token.json";
+
+        a.click();
+
+        URL.revokeObjectURL(url);
+
+        addLog("Demo token.json downloaded.");
+    }
+
+</script>
+
 </body>
 </html>
